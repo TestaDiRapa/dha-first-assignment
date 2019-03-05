@@ -5,6 +5,11 @@ import java.util.regex.Pattern;
 
 public class ArgumentExtractor {
 
+    /**
+     * Extracts the command from the command
+     * @param command the command to extract the command from
+     * @return the command or an empty string, if error
+     */
     public static String extractCommand(String command){
         Pattern p = Pattern.compile("^<([A-Z]+)>");
         Matcher m = p.matcher(command);
