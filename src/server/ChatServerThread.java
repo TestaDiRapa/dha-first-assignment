@@ -24,7 +24,7 @@ public class ChatServerThread extends Thread{
             String command = reader.readLine();
             String firstArgument = extractNthArgument(command, 1);
 
-            while(!extractCommand(command).equals(LOGIN)|| firstArgument == null || firstArgument.equals("")){
+            while(!extractCommand(command).equals(LOGIN)|| firstArgument.equals("")){
                 sendProtocol(ERROR);
                 command = reader.readLine();
                 firstArgument = extractNthArgument(command, 1);

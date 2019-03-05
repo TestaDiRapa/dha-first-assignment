@@ -19,7 +19,11 @@ public class ArgumentExtractor {
      * @return the argument, if any, or empty string
      */
     public static String extractNthArgument(String command, int argument){
-        Pattern p = Pattern.compile("^<[A-Z]+>( <(.*)>)+");
+        String regex = "^<[A-Z]+>";
+        for(int i=0; i<argument; i++){
+            regex += " <([^<>]*)>";
+        }
+        Pattern p = Pattern.compile(regex);
         Matcher m = p.matcher(command);
         if(m.find()) return m.group(argument);
         return "";
