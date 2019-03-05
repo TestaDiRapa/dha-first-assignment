@@ -5,7 +5,7 @@ public interface Constants {
     int PORT = 6666;
 
     String LOGIN = "LOGIN";
-    String LOGOUT = "LOGUT";
+    String LOGOUT = "LOGOUT";
     String BROADCAST = "BROADCAST";
     String ONETOONE = "ONETOONE";
     String SUCCESS = "SUCCESS";
