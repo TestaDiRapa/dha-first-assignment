@@ -11,6 +11,7 @@ public class ChatServerThread extends Thread{
 
     private Socket socket;
     private ChatServer server;
+    private PrintWriter writer;
 
     ChatServerThread(Socket socket, ChatServer server){
         this.socket = socket;
@@ -19,8 +20,10 @@ public class ChatServerThread extends Thread{
 
     @Override
     public void run() {
-        try(BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_16))) {
+        try(PrintWriter writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_16));
+            BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_16))) {
 
+            this.writer = writer;
             String command = reader.readLine();
             String firstArgument = extractNthArgument(command, 1);
 
@@ -70,15 +73,9 @@ public class ChatServerThread extends Thread{
     }
 
     private synchronized void sendProtocol(String method, String... args){
-
         String toSend = createCommand(method, args);
-
-        try(PrintWriter writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_16))){
-            writer.println(toSend);
-            writer.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        writer.println(toSend);
+        writer.flush();
     }
 
     /**
