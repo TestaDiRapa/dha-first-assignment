@@ -6,6 +6,22 @@ import java.util.regex.Pattern;
 public class CommandParser {
 
     /**
+     * Creates a formatted command
+     * @param method the method
+     * @param args the arguments
+     * @return the formatted command
+     */
+    public static String createCommand(String method, String... args){
+        String command = "<" + method + ">";
+        if(args != null) {
+            for (String arg : args) {
+                command = command + " <" + arg + ">";
+            }
+        }
+        return command;
+    }
+
+    /**
      * Extracts the command from the command
      * @param command the command to extract the command from
      * @return the command or an empty string, if error
