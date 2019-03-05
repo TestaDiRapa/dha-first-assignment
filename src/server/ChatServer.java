@@ -48,11 +48,7 @@ public class ChatServer {
      * Logs out a user and removes the thread from the map
      * @param username the username to log out
      */
-    public synchronized void logOut(String username){
-        System.out.println("RIMUOVO "+username);
-        loggedUsers.remove(username);
-        System.out.println(loggedUsers.get(username)==null);
-    }
+    public synchronized void logOut(String username){ loggedUsers.remove(username); }
 
     /**
      * Sends a broadcast message to anyone except the sender
