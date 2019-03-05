@@ -22,10 +22,8 @@ public class ChatServer {
 
             while(true) {
                 Socket client = serverSocket.accept();
-
                 ChatServerThread tmp = new ChatServerThread(client, this);
-                tmp.run();
-
+                tmp.start();
             }
 
         } catch (IOException e) {
@@ -51,17 +49,19 @@ public class ChatServer {
      * @param username the username to log out
      */
     public synchronized void logOut(String username){
+        System.out.println("RIMUOVO "+username);
         loggedUsers.remove(username);
+        System.out.println(loggedUsers.get(username)==null);
     }
 
     /**
-     * Sends a broadcast message
+     * Sends a broadcast message to anyone except the sender
      * @param sender the sender's username
      * @param message the message to send
      */
     synchronized void sendBroadcast(String sender, String message){
         for(Map.Entry<String, ChatServerThread> entry : loggedUsers.entrySet()){
-            entry.getValue().sendMessage(sender, message);
+            if(!entry.getKey().equals(sender)) entry.getValue().sendMessage(sender, message);
         }
     }
 
@@ -72,7 +72,7 @@ public class ChatServer {
      * @param message the message to send
      * @return true if successful, false if the receiver is not found
      */
-    boolean sendMessage(String sender, String receiver, String message){
+    synchronized boolean sendMessage(String sender, String receiver, String message){
         ChatServerThread receiverThread = loggedUsers.get(receiver);
         if(receiverThread != null) {
             receiverThread.sendMessage(sender, message);

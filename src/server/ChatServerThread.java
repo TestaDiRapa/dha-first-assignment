@@ -12,6 +12,7 @@ public class ChatServerThread extends Thread{
     private Socket socket;
     private ChatServer server;
     private PrintWriter writer;
+    private BufferedReader reader;
 
     ChatServerThread(Socket socket, ChatServer server){
         this.socket = socket;
@@ -24,12 +25,14 @@ public class ChatServerThread extends Thread{
             BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_16))) {
 
             this.writer = writer;
-            String command = reader.readLine();
+            this.reader = reader;
+
+            String command = readFromStream();
             String firstArgument = extractNthArgument(command, 1);
 
             while(!extractCommand(command).equals(LOGIN)|| firstArgument.equals("")){
                 sendProtocol(ERROR);
-                command = reader.readLine();
+                command = readFromStream();
                 firstArgument = extractNthArgument(command, 1);
             }
 
@@ -39,12 +42,15 @@ public class ChatServerThread extends Thread{
                 sendProtocol(SUCCESS);
 
                 while(!extractCommand(command).equals(LOGOUT)) {
-                    command = reader.readLine();
+                    command = readFromStream();
 
                     if (extractCommand(command).equals(ONETOONE)) {
                         String receiver = extractNthArgument(command, 1);
                         String message = extractNthArgument(command, 2);
-                        if (server.sendMessage(username, receiver, message)) {
+                        if(server.sendMessage(username, receiver, message)) {
+                            sendProtocol(SUCCESS);
+                        }
+                        else {
                             sendProtocol(ERROR);
                         }
                     } else if (extractCommand(command).equals(BROADCAST)) {
@@ -72,10 +78,24 @@ public class ChatServerThread extends Thread{
         }
     }
 
-    private synchronized void sendProtocol(String method, String... args){
-        String toSend = createCommand(method, args);
-        writer.println(toSend);
-        writer.flush();
+    private void sendProtocol(String method, String... args){
+        synchronized (writer) {
+            String toSend = createCommand(method, args);
+            writer.println(toSend);
+            writer.flush();
+        }
+    }
+
+    private String readFromStream() throws IOException {
+        synchronized (reader) {
+            String response = null;
+
+            while (response == null) {
+                response = reader.readLine();
+            }
+
+            return response;
+        }
     }
 
     /**
@@ -83,7 +103,7 @@ public class ChatServerThread extends Thread{
      * @param sender the username that sends the message
      * @param message the message to send
      */
-    synchronized void sendMessage(String sender, String message){
+    void sendMessage(String sender, String message){
         sendProtocol(MESSAGE, sender, message);
     }
 }
