@@ -3,8 +3,9 @@ package server;
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
+import static common.ArgumentExtractor.*;
+import static common.Constants.*;
 
 public class ChatServerThread extends Thread{
 
@@ -18,40 +19,43 @@ public class ChatServerThread extends Thread{
 
     @Override
     public void run() {
-        try(PrintWriter writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_16));
-            BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_16))) {
+        try(BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_16))) {
 
             String command = reader.readLine();
+            String firstArgument = extractNthArgument(command, 1);
 
-            while(!command.matches("^<LOGIN>.*") || extractFirstArgument(command) == null || extractFirstArgument(command).equals("")){
-                writer.println("<ERROR>");
-                writer.flush();
+            while(!extractCommand(command).equals(LOGIN)|| firstArgument == null || firstArgument.equals("")){
+                sendProtocol(ERROR);
                 command = reader.readLine();
+                firstArgument = extractNthArgument(command, 1);
             }
 
-            String username = extractFirstArgument(command);
+            String username = extractNthArgument(command, 1);
 
             if(server.logIn(username, this)){
-                writer.println("<SUCCESS>");
-                writer.flush();
+                sendProtocol(SUCCESS);
 
-                while(!command.matches("^<LOGOUT>.*")){
+                while(!extractCommand(command).equals(LOGOUT)) {
                     command = reader.readLine();
 
-                    if(command.matches("^<ONETOONE>.*")){
-                        String receiver = extractFirstArgument(command);
-                        String message = extractSecondArgument(command);
-                        if(server.sendMessage(username, receiver, message)) {
-                            writer.println("<ERROR>");
-                            writer.flush();
+                    if (extractCommand(command).equals(ONETOONE)) {
+                        String receiver = extractNthArgument(command, 1);
+                        String message = extractNthArgument(command, 2);
+                        if (server.sendMessage(username, receiver, message)) {
+                            sendProtocol(ERROR);
                         }
-                    }
-                    else if(command.matches("^<BROADCAST>.*")){
-                        String message = extractFirstArgument(command);
+                    } else if (extractCommand(command).equals(BROADCAST)) {
+                        String message = extractNthArgument(command, 1);
                         server.sendBroadcast(username, message);
                     }
 
                 }
+
+                server.logOut(username);
+            }
+
+            else{
+                sendProtocol(ERROR);
             }
 
         } catch (IOException e) {
@@ -65,28 +69,17 @@ public class ChatServerThread extends Thread{
         }
     }
 
-    /**
-     * Extracts the first argument from a command
-     * @param command the command
-     * @return the argument, if any, or empty string
-     */
-    private String extractFirstArgument(String command){
-        Pattern p = Pattern.compile("<[A-Z]+> <(.*)>");
-        Matcher m = p.matcher(command);
-        if(m.find()) return m.group(1);
-        return "";
-    }
-
-    /**
-     * Extracts the second argument from a command
-     * @param command the command
-     * @return the argument, if any, or empty string
-     */
-    private String extractSecondArgument(String command){
-        Pattern p = Pattern.compile("<[A-Z]+> <(.*)> <(.*)>");
-        Matcher m = p.matcher(command);
-        if(m.find()) return m.group(2);
-        return "";
+    private synchronized void sendProtocol(String method, String... args){
+        String toSend = "<" + method + ">";
+        for(String arg : args){
+            toSend = toSend + " <" + arg + ">";
+        }
+        try(PrintWriter writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_16))){
+            writer.println(toSend);
+            writer.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -95,11 +88,6 @@ public class ChatServerThread extends Thread{
      * @param message the message to send
      */
     synchronized void sendMessage(String sender, String message){
-        try(PrintWriter writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_16))){
-            writer.println("<MESSAGE> <"+sender+"> "+"<"+message+">");
-            writer.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        sendProtocol(MESSAGE, sender, message);
     }
 }
