@@ -4,7 +4,7 @@ import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 
-import static common.ArgumentExtractor.*;
+import static common.CommandParser.*;
 import static common.Constants.*;
 
 public class ChatServerThread extends Thread{

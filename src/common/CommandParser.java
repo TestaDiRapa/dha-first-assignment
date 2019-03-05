@@ -3,7 +3,7 @@ package common;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ArgumentExtractor {
+public class CommandParser {
 
     /**
      * Extracts the command from the command
