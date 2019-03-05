@@ -71,8 +71,10 @@ public class ChatServerThread extends Thread{
 
     private synchronized void sendProtocol(String method, String... args){
         String toSend = "<" + method + ">";
-        for(String arg : args){
-            toSend = toSend + " <" + arg + ">";
+        if(args != null) {
+            for (String arg : args) {
+                toSend = toSend + " <" + arg + ">";
+            }
         }
         try(PrintWriter writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_16))){
             writer.println(toSend);
