@@ -12,4 +12,7 @@ public interface Constants {
     String ERROR = "ERROR";
     String MESSAGE = "MESSAGE";
 
+    String B = "B";
+    String P = "P";
+
 }

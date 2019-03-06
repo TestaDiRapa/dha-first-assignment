@@ -103,7 +103,7 @@ public class ChatServerThread extends Thread{
      * @param sender the username that sends the message
      * @param message the message to send
      */
-    void sendMessage(String sender, String message){
-        sendProtocol(MESSAGE, sender, message);
+    void sendMessage(String sender, String message, String type){
+        sendProtocol(MESSAGE, sender, message, type);
     }
 }

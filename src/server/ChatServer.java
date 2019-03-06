@@ -6,7 +6,7 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 
-import static common.Constants.PORT;
+import static common.Constants.*;
 
 public class ChatServer {
 
@@ -34,7 +34,7 @@ public class ChatServer {
     /**
      * Logs in a user
      * @param username the username to log in
-     * @param thread the thread responsible for that connction
+     * @param thread the thread responsible for that connection
      * @return true if successful, false if already exists
      */
     synchronized boolean logIn(String username, ChatServerThread thread){
@@ -57,7 +57,7 @@ public class ChatServer {
      */
     synchronized void sendBroadcast(String sender, String message){
         for(Map.Entry<String, ChatServerThread> entry : loggedUsers.entrySet()){
-            if(!entry.getKey().equals(sender)) entry.getValue().sendMessage(sender, message);
+            if(!entry.getKey().equals(sender)) entry.getValue().sendMessage(sender, message, P);
         }
     }
 
@@ -71,7 +71,7 @@ public class ChatServer {
     synchronized boolean sendMessage(String sender, String receiver, String message){
         ChatServerThread receiverThread = loggedUsers.get(receiver);
         if(receiverThread != null) {
-            receiverThread.sendMessage(sender, message);
+            receiverThread.sendMessage(sender, message, B);
             return true;
         }
         return false;
