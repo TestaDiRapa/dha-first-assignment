@@ -14,7 +14,6 @@ import common.CommandParser;
 import static common.CommandParser.createCommand;
 import static java.lang.System.exit;
 import java.net.ConnectException;
-import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
 
 public class ChatClient {
