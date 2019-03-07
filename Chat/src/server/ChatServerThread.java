@@ -38,14 +38,14 @@ public class ChatServerThread implements Runnable{
             this.reader = reader;
 
             //Reads the first command
-            String command = readFromStream();
+            String command = reader.readLine();
             String username = extractNthArgument(command, 1);
 
             //If it receives a command that is not login or whose username is not suitable
             //sends an error and waits
             while(!extractCommand(command).equals(LOGIN)|| !isUsernameValid(username) || !server.logIn(username, this)){
                 sendProtocol(ERROR);
-                command = readFromStream();
+                command = reader.readLine();
                 username = extractNthArgument(command, 1);
             }
 
@@ -54,7 +54,7 @@ public class ChatServerThread implements Runnable{
             //Cycles until it receives a LOGOUT command
             while(!extractCommand(command).equals(LOGOUT)) {
                 //Reads the command
-                command = readFromStream();
+                command = reader.readLine();
 
                 //If the command is ONETOONE, extracts receiver and message
                 //and asks the server to send the message
@@ -112,16 +112,16 @@ public class ChatServerThread implements Runnable{
      * @return the first not null message received
      * @throws IOException an exception
      */
-    private String readFromStream() throws IOException {
-        synchronized (reader) {
-            String response = null;
-            while (response == null) {
-                response = reader.readLine();
-            }
-
-            return response;
-        }
-    }
+//    private String readFromStream() throws IOException {
+//        synchronized (reader) {
+//            String response = null;
+//            while (response == null) {
+//                response = reader.readLine();
+//            }
+//
+//            return response;
+//        }
+//    }
 
     /**
      * Sends a message to the client
