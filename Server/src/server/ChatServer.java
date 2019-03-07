@@ -8,6 +8,9 @@ import java.util.Map;
 
 import static common.Constants.*;
 
+/**
+ * Main thread for managing connections
+ */
 public class ChatServer {
 
     private Map<String, ChatServerThread> loggedUsers = new HashMap<>();

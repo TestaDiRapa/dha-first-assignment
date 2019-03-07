@@ -1,5 +1,8 @@
 package common;
 
+/**
+ * Some constants useful for protocols and port
+ */
 public interface Constants {
 
     int PORT = 6666;

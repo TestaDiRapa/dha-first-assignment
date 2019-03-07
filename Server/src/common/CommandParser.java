@@ -3,6 +3,9 @@ package common;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * The class command parser offers some functions to create and parse commands for the message protocol
+ */
 public class CommandParser {
 
     /**
