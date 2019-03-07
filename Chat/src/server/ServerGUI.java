@@ -77,6 +77,7 @@ public class ServerGUI {
         mainFrame.add(userLabel, gbc);
         logArea = new JTextArea();
         logArea.setBackground(new Color(-2563870));
+        logArea.setEditable(false);
         logArea.setForeground(new Color(-12961222));
         gbc = new GridBagConstraints();
         gbc.gridx = 3;
@@ -96,6 +97,7 @@ public class ServerGUI {
         mainFrame.add(logLabel, gbc);
         userList = new JTextArea();
         userList.setBackground(new Color(-2563870));
+        userList.setEditable(false);
         userList.setForeground(new Color(-12961222));
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
