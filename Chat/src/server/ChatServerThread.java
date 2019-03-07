@@ -49,6 +49,8 @@ public class ChatServerThread implements Runnable{
 
             sendProtocol(SUCCESS);
 
+            sendProtocol(ONETOONE, "server", "Welcome into the chat, "+username);
+
             //Cycles until it receives a LOGOUT command
             while(!extractCommand(command).equals(LOGOUT)) {
                 //Reads the command
