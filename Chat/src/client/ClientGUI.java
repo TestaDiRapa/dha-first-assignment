@@ -32,7 +32,6 @@ public class ClientGUI extends javax.swing.JFrame {
     private String username;
     private String command;
     private String windows = "";
-    private ReaderThread readerThread;
            
     
     /**
@@ -69,9 +68,8 @@ public class ClientGUI extends javax.swing.JFrame {
                 JOptionPane.showMessageDialog(null, "Login error!\nTry changing username");
             }
         }
-
-        readerThread = new ReaderThread(input, this);
-        new Thread(readerThread).start();
+        
+        new Thread(new ReaderThread(input, this)).start();
 
     }
 
