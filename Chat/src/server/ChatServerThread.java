@@ -102,6 +102,6 @@ public class ChatServerThread extends Thread{
      * @param message the message to send
      */
     void sendMessage(String sender, String message, String type){
-        sendProtocol(MESSAGE, sender, message, type);
+        sendProtocol(type, sender, message);
     }
 }

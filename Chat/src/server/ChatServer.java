@@ -60,7 +60,7 @@ public class ChatServer {
      */
     synchronized void sendBroadcast(String sender, String message){
         for(Map.Entry<String, ChatServerThread> entry : loggedUsers.entrySet()){
-            if(!entry.getKey().equals(sender)) entry.getValue().sendMessage(sender, message, P);
+            if(!entry.getKey().equals(sender)) entry.getValue().sendMessage(sender, message, ONETOONE);
         }
     }
 
@@ -74,7 +74,7 @@ public class ChatServer {
     synchronized boolean sendMessage(String sender, String receiver, String message){
         ChatServerThread receiverThread = loggedUsers.get(receiver);
         if(receiverThread != null) {
-            receiverThread.sendMessage(sender, message, B);
+            receiverThread.sendMessage(sender, message, BROADCAST);
             return true;
         }
         return false;

@@ -13,9 +13,5 @@ public interface Constants {
     String ONETOONE = "ONETOONE";
     String SUCCESS = "SUCCESS";
     String ERROR = "ERROR";
-    String MESSAGE = "MESSAGE";
-
-    String B = "B";
-    String P = "P";
 
 }
