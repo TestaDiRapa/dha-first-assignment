@@ -209,7 +209,7 @@ public class ClientGUI extends javax.swing.JFrame {
     private void broadcastButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_broadcastButtonActionPerformed
         if(inputArea.getText() != null) {
             command = createCommand("BROADCAST", inputArea.getText());
-            writeOnChat("<BROADCAST> "+"<"+username+">"+" <"+inputArea.getText()+">");
+            writeOnChat("BROADCAST "+"by "+username+inputArea.getText());
             output.println(command);
             output.flush();
         }
