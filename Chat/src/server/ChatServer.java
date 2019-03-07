@@ -11,27 +11,20 @@ import static common.Constants.*;
 /**
  * Main thread for managing connections
  */
-public class ChatServer implements Runnable{
+public class ChatServer {
 
     private Map<String, ChatServerThread> loggedUsers = new HashMap<>();
-    private ServerGUI gui;
-
-    public ChatServer(ServerGUI gui) {
-        this.gui = gui;
-    }
 
     /**
      * Main function. Waits for the client's connection and starts the threads.
      */
-    @Override
-    public void run(){
+    public void startServer(){
         try {
             ServerSocket serverSocket = new ServerSocket(PORT);
-            gui.addEvent("Server started!");
+            System.out.println("Server started!");
 
             while(true) {
                 Socket client = serverSocket.accept();
-                gui.addEvent("New connection from "+client.getInetAddress().toString());
                 Thread tmp = new Thread(new ChatServerThread(client, this));
                 tmp.start();
 
@@ -52,8 +45,6 @@ public class ChatServer implements Runnable{
         if(loggedUsers.containsKey(username)) return false;
 
         loggedUsers.put(username, thread);
-        gui.addEvent(username + " logged in!");
-        gui.updateUsers(loggedUsers.keySet());
         return true;
     }
 
@@ -61,11 +52,7 @@ public class ChatServer implements Runnable{
      * Logs out a user and removes the thread from the map
      * @param username the username to log out
      */
-    public synchronized void logOut(String username){
-        loggedUsers.remove(username);
-        gui.addEvent(username + " logged out!");
-        gui.updateUsers(loggedUsers.keySet());
-    }
+    public synchronized void logOut(String username){ loggedUsers.remove(username); }
 
     /**
      * Sends a broadcast message to anyone except the sender
