@@ -16,7 +16,6 @@ public class ChatServerThread implements Runnable{
     private Socket socket;
     private ChatServer server;
     private PrintWriter writer;
-    private BufferedReader reader;
 
     /**
      * Constructor
@@ -33,9 +32,8 @@ public class ChatServerThread implements Runnable{
         try(PrintWriter writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_16));
             BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_16))) {
 
-            //Instantiate the streams (try with resources, so closed automatically)
+            //Instantiate the write stream (try with resources, so closed automatically)
             this.writer = writer;
-            this.reader = reader;
 
             //Reads the first command
             String command = reader.readLine();
@@ -106,22 +104,6 @@ public class ChatServerThread implements Runnable{
             writer.flush();
         }
     }
-
-    /**
-     * Blocking function to read the input stream
-     * @return the first not null message received
-     * @throws IOException an exception
-     */
-//    private String readFromStream() throws IOException {
-//        synchronized (reader) {
-//            String response = null;
-//            while (response == null) {
-//                response = reader.readLine();
-//            }
-//
-//            return response;
-//        }
-//    }
 
     /**
      * Sends a message to the client

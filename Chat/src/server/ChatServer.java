@@ -16,7 +16,7 @@ public class ChatServer implements Runnable{
     private Map<String, ChatServerThread> loggedUsers = new HashMap<>();
     private ServerGUI gui;
 
-    public ChatServer(ServerGUI gui) {
+    ChatServer(ServerGUI gui) {
         this.gui = gui;
     }
 
@@ -61,7 +61,7 @@ public class ChatServer implements Runnable{
      * Logs out a user and removes the thread from the map
      * @param username the username to log out
      */
-    public synchronized void logOut(String username){
+    synchronized void logOut(String username){
         loggedUsers.remove(username);
         gui.addEvent(username + " logged out!");
         gui.updateUsers(loggedUsers.keySet());
