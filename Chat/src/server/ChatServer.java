@@ -59,10 +59,11 @@ public class ChatServer {
      * @param sender the sender's username
      * @param message the message to send
      */
-    synchronized void sendBroadcast(String sender, String message){
+    synchronized String sendBroadcast(String sender, String message){
         for(Map.Entry<String, ChatServerThread> entry : loggedUsers.entrySet()){
             if(!entry.getKey().equals(sender)) entry.getValue().sendMessage(sender, message, ONETOONE);
         }
+        return Integer.toString(loggedUsers.size()-1);
     }
 
     /**

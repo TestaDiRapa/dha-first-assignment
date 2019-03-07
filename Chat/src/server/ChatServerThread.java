@@ -76,7 +76,8 @@ public class ChatServerThread implements Runnable{
                     //If the command is BROADCAST, asks the server to send a broadcast message
                     } else if (extractCommand(command).equals(BROADCAST)) {
                         String message = extractNthArgument(command, 1);
-                        server.sendBroadcast(username, message);
+                        String receivers = server.sendBroadcast(username, message);
+                        sendProtocol(SUCCESS, receivers);
                     }
 
                 }
