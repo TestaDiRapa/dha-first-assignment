@@ -8,6 +8,7 @@ import static common.CommandParser.createCommand;
 import static common.CommandParser.extractCommand;
 import static common.Constants.ERROR;
 import static common.Constants.PORT;
+import static common.Constants.SUCCESS;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -34,6 +35,7 @@ public class ClientGUI extends javax.swing.JFrame {
     String username;
     String response=null;
     String command;
+    String windows;
            
     
     /**
@@ -123,6 +125,11 @@ public class ClientGUI extends javax.swing.JFrame {
         jScrollPane2.setViewportView(chatArea);
 
         broadcastButton.setText("Send broadcast message");
+        broadcastButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                broadcastButtonActionPerformed(evt);
+            }
+        });
 
         jLabel1.setText("Receiver:");
 
@@ -200,7 +207,31 @@ public class ClientGUI extends javax.swing.JFrame {
                 
             JOptionPane.showMessageDialog(null,"This is the response: " + response);
         }
+        
+        if(extractCommand(response).equals(SUCCESS))
+            windows= windows+"<ONETOONE:" + jTextField1.getText()+"> "+"<"+username+">"+" <"+inputArea.getText()+">"+"\n";
+            chatArea.setText(windows);
     }//GEN-LAST:event_sendButtonActionPerformed
+
+    private void broadcastButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_broadcastButtonActionPerformed
+        // TODO add your handling code here:
+        if(inputArea.getText() != null){
+            command= createCommand("BROADCAST",inputArea.getText());
+                                            output.println(command);
+                                            output.flush();
+            try {
+                response = read.readLine();
+            } catch (IOException ex) {
+                Logger.getLogger(ClientGUI.class.getName()).log(Level.SEVERE, null, ex);
+            }
+                
+                                             JOptionPane.showMessageDialog(null,"This is the response: " + response);
+        }
+        
+        if(extractCommand(response).equals(SUCCESS))
+            windows= windows+"<BROADCAST> "+"<"+username+">"+" <"+inputArea.getText()+">"+"\n";
+            chatArea.setText(windows);
+    }//GEN-LAST:event_broadcastButtonActionPerformed
 
     /**
      * @param args the command line arguments
