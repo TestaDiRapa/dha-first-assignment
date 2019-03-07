@@ -8,9 +8,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import javax.swing.JOptionPane;
-
 import static common.Constants.*;
-import common.CommandParser;
 import static common.CommandParser.createCommand;
 import static java.lang.System.exit;
 import java.net.ConnectException;
@@ -22,7 +20,7 @@ public class ChatClient {
     Socket socket;
     BufferedReader read;
     PrintWriter output;
-    CommandParser command=new CommandParser();
+    //CommandParser command=new CommandParser();
 
     public void startClient() throws UnknownHostException, IOException,ConnectException{
         //Create socket connection
@@ -47,19 +45,54 @@ public class ChatClient {
         
 
         //create Buffered reader for reading response from server
-        read = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        read = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_16));
 
         //read response from server
         String response = read.readLine();
-        System.out.println("This is the response: " + response);
-
+       
+        
         //display response
-        JOptionPane.showMessageDialog(null, response);
-    }
+        JOptionPane.showMessageDialog(null,"This is the response: " + response);
+ 
+        //Da qui si modifica quando si fa la GUI
+        String command,realCommand;
+              command=JOptionPane.showInputDialog(null, "Write the command:");
+               while(!command.equals(LOGOUT)) {
+                   switch(command){
+                       case "BROADCAST":  
+                                             realCommand= createCommand(command,JOptionPane.showInputDialog(null, "Write the message:"));
+                                            output.println(realCommand);
+                                            output.flush();
+                                             response = read.readLine();
+                
+                                             JOptionPane.showMessageDialog(null,"This is the response: " + response);
+                                              break;
+                       case "ONETOONE": 
+                                             realCommand= createCommand(command,JOptionPane.showInputDialog(null, "Write the sender:"),JOptionPane.showInputDialog(null, "Write the message:"));
+                           
+                                             output.println(realCommand);
+                                             output.flush();
+                
+                                            response = read.readLine();
+                
+                                             JOptionPane.showMessageDialog(null,"This is the response: " + response);
+                                              break;
+                           
+                       default :JOptionPane.showMessageDialog(null, "Error command");
+                           
 
-    public void fileInfo(){
-
+               }
+                
+        
+                command=JOptionPane.showInputDialog(null, "Write the command:");   
+                
+        }
+        
+         
+         output.println(createCommand("LOGOUT"));
+         output.flush();
     }
+   
 
     public static void main(String args[]){
         ChatClient client = new ChatClient();
