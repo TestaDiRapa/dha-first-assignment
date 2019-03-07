@@ -43,52 +43,45 @@ public class ChatServerThread implements Runnable{
 
             //If it receives a command that is not login or whose username is not suitable
             //sends an error and waits
-            while(!extractCommand(command).equals(LOGIN)|| !isUsernameValid(username)){
+            while(!extractCommand(command).equals(LOGIN)|| !isUsernameValid(username) || !server.logIn(username, this)){
                 sendProtocol(ERROR);
                 command = readFromStream();
                 username = extractNthArgument(command, 1);
             }
 
-            //Tries to login, if the username do not exists return a SUCCESS message
-            if(server.logIn(username, this)){
-                sendProtocol(SUCCESS);
+            sendProtocol(SUCCESS);
 
-                //Cycles until it receives a LOGOUT command
-                while(!extractCommand(command).equals(LOGOUT)) {
-                    //Reads the command
-                    command = readFromStream();
+            //Cycles until it receives a LOGOUT command
+            while(!extractCommand(command).equals(LOGOUT)) {
+                //Reads the command
+                command = readFromStream();
 
-                    //If the command is ONETOONE, extracts receiver and message
-                    //and asks the server to send the message
-                    if (extractCommand(command).equals(ONETOONE)) {
-                        String receiver = extractNthArgument(command, 1);
-                        String message = extractNthArgument(command, 2);
+                //If the command is ONETOONE, extracts receiver and message
+                //and asks the server to send the message
+                if (extractCommand(command).equals(ONETOONE)) {
+                    String receiver = extractNthArgument(command, 1);
+                    String message = extractNthArgument(command, 2);
 
-                        //If the server managed to send the message, sends a SUCCESS
-                        //to the client, otherwise ERROR
-                        if(server.sendMessage(username, receiver, message)) {
-                            sendProtocol(SUCCESS);
-                        }
-                        else {
-                            sendProtocol(ERROR);
-                        }
-
-                    //If the command is BROADCAST, asks the server to send a broadcast message
-                    } else if (extractCommand(command).equals(BROADCAST)) {
-                        String message = extractNthArgument(command, 1);
-                        String receivers = server.sendBroadcast(username, message);
-                        sendProtocol(SUCCESS, receivers);
+                    //If the server managed to send the message, sends a SUCCESS
+                    //to the client, otherwise ERROR
+                    if(server.sendMessage(username, receiver, message)) {
+                        sendProtocol(SUCCESS);
+                    }
+                    else {
+                        sendProtocol(ERROR);
                     }
 
+                //If the command is BROADCAST, asks the server to send a broadcast message
+                } else if (extractCommand(command).equals(BROADCAST)) {
+                    String message = extractNthArgument(command, 1);
+                    String receivers = server.sendBroadcast(username, message);
+                    sendProtocol(SUCCESS, receivers);
                 }
 
-                //If it exits from the while, means that the command was LOGOUT, so it logs out the user
-                server.logOut(username);
             }
 
-            else{
-                sendProtocol(ERROR);
-            }
+            //If it exits from the while, means that the command was LOGOUT, so it logs out the user
+            server.logOut(username);
 
         } catch (IOException e) {
             e.printStackTrace();
