@@ -116,7 +116,8 @@ public class ChatServerThread implements Runnable{
         synchronized (reader) {
             String response = null;
             while (response == null) {
-                response = reader.readLine(); }
+                response = reader.readLine();
+            }
 
             return response;
         }
