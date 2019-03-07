@@ -1,5 +1,6 @@
 package client;
 
+import common.CommandParser;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -10,6 +11,7 @@ import java.net.UnknownHostException;
 import javax.swing.JOptionPane;
 import static common.Constants.*;
 import static common.CommandParser.createCommand;
+import static common.CommandParser.extractCommand;
 import static java.lang.System.exit;
 import java.net.ConnectException;
 import java.nio.charset.StandardCharsets;
@@ -20,6 +22,8 @@ public class ChatClient {
     Socket socket;
     BufferedReader read;
     PrintWriter output;
+    String username;
+    String response=null;
     //CommandParser command=new CommandParser();
 
     public void startClient() throws UnknownHostException, IOException,ConnectException{
@@ -35,8 +39,9 @@ public class ChatClient {
         //create printwriter for sending login to server
 
         output = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_16));
+        while(response==null){
         //prompt for user name
-        String username = createCommand("LOGIN",JOptionPane.showInputDialog(null, "Enter User Name:"));
+        username= createCommand("LOGIN",JOptionPane.showInputDialog(null, "Enter User Name:"));
 
         //send user name to server
         output.println(username);
@@ -48,11 +53,16 @@ public class ChatClient {
         read = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_16));
 
         //read response from server
-        String response = read.readLine();
+        response = read.readLine();
        
         
         //display response
         JOptionPane.showMessageDialog(null,"This is the response: " + response);
+        System.out.println(response);
+        if (extractCommand(response).equals(ERROR)) response=null;
+                System.out.println(response);
+
+    }
  
         //Da qui si modifica quando si fa la GUI
         String command,realCommand;
