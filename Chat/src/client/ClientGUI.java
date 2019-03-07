@@ -36,6 +36,7 @@ public class ClientGUI extends javax.swing.JFrame {
     String response=null;
     String command;
     String windows;
+    String realUsername;
            
     
     /**
@@ -57,10 +58,11 @@ public class ClientGUI extends javax.swing.JFrame {
         output = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_16));
         while(response==null){
         //prompt for user name
-        username= createCommand("LOGIN",JOptionPane.showInputDialog(null, "Enter User Name:"));
-
+        username=JOptionPane.showInputDialog(null, "Enter User Name:");
+        command= createCommand("LOGIN",username);
+        
         //send user name to server
-        output.println(username);
+        output.println(command);
 
         output.flush();
         
@@ -77,9 +79,19 @@ public class ClientGUI extends javax.swing.JFrame {
         if (extractCommand(response).equals(ERROR)) response=null;
     }
         
+//        while(true){
+//             try {
+//                response = read.readLine();
+//            } catch (IOException ex) {
+//                Logger.getLogger(ClientGUI.class.getName()).log(Level.SEVERE, null, ex);
+//            }
+//                
+//            
+//        }
+        }
+            
         
-        
-    }
+    
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -189,9 +201,17 @@ public class ClientGUI extends javax.swing.JFrame {
         
          output.println(createCommand("LOGOUT"));
          output.flush();
+        try {
+            socket.close();
+        } catch (IOException ex) {
+            Logger.getLogger(ClientGUI.class.getName()).log(Level.SEVERE, null, ex);
+        }
          this.dispose();
     }//GEN-LAST:event_logoutButtonActionPerformed
 
+    
+    
+    
     private void sendButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sendButtonActionPerformed
         // TODO add your handling code here:
         
@@ -199,18 +219,10 @@ public class ClientGUI extends javax.swing.JFrame {
             command=createCommand("ONETOONE", jTextField1.getText(), inputArea.getText());
             output.println(command);
             output.flush();
-            try {
-                response = read.readLine();
-            } catch (IOException ex) {
-                Logger.getLogger(ClientGUI.class.getName()).log(Level.SEVERE, null, ex);
-            }
-                
-            JOptionPane.showMessageDialog(null,"This is the response: " + response);
+            windows= windows+
+                    username+"----->"+jTextField1.getText() + " Message: " + inputArea.getText()+"\n";
         }
-        
-        if(extractCommand(response).equals(SUCCESS))
-            windows= windows+"<ONETOONE:" + jTextField1.getText()+"> "+"<"+username+">"+" <"+inputArea.getText()+">"+"\n";
-            chatArea.setText(windows);
+       
     }//GEN-LAST:event_sendButtonActionPerformed
 
     private void broadcastButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_broadcastButtonActionPerformed
