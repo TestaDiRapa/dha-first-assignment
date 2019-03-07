@@ -89,10 +89,8 @@ public class ChatServerThread extends Thread{
     private String readFromStream() throws IOException {
         synchronized (reader) {
             String response = null;
-
             while (response == null) {
-                response = reader.readLine();
-            }
+                response = reader.readLine(); }
 
             return response;
         }
