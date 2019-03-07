@@ -4,11 +4,11 @@
  * and open the template in the editor.
  */
 package client;
+import common.Constants;
+
 import static common.CommandParser.createCommand;
 import static common.CommandParser.extractCommand;
-import static common.Constants.ERROR;
 import static common.Constants.PORT;
-import static common.Constants.SUCCESS;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -17,7 +17,6 @@ import java.io.PrintWriter;
 import static java.lang.System.exit;
 import java.net.ConnectException;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -28,70 +27,53 @@ import javax.swing.*;
  * @author Alex1
  */
 public class ClientGUI extends javax.swing.JFrame {
-    private final String FILENAME = null;
-    Socket socket;
-    BufferedReader read;
-    PrintWriter output;
-    String username;
-    String response=null;
-    String command;
-    String windows;
-    String realUsername;
+    private Socket socket;
+    private PrintWriter output;
+    private String username;
+    private String command;
+    private String windows = "";
+    private ReaderThread readerThread;
            
     
     /**
      * Creates new form ClientGUI
      */
-    public ClientGUI() throws UnknownHostException, IOException,ConnectException {
+    private ClientGUI() throws IOException {
         initComponents();
         
- try{
-        socket = new Socket("localhost",PORT);
-
-
+        try{
+            socket = new Socket("localhost",PORT);
        } catch(ConnectException e){
           JOptionPane.showMessageDialog(null, "Server not ready");
            exit(0);
        }
-        //create printwriter for sending login to server
-
+        //Initializes I/O streams
         output = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_16));
-        while(response==null){
-        //prompt for user name
-        username=JOptionPane.showInputDialog(null, "Enter User Name:");
-        command= createCommand("LOGIN",username);
-        
-        //send user name to server
-        output.println(command);
+        BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_16));
 
-        output.flush();
-        
+        String response = null;
+        while(response ==null){
+            //prompt for user name
+            username=JOptionPane.showInputDialog(null, "Enter User Name:");
+            command= createCommand("LOGIN",username);
 
-        //create Buffered reader for reading response from server
-        read = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_16));
+            //send user name to server
+            output.println(command);
+            output.flush();
 
-        //read response from server
-        response = read.readLine();
-       
-        
-        //display response
-        JOptionPane.showMessageDialog(null,"This is the response: " + response);
-        if (extractCommand(response).equals(ERROR)) response=null;
-    }
-        
-//        while(true){
-//             try {
-//                response = read.readLine();
-//            } catch (IOException ex) {
-//                Logger.getLogger(ClientGUI.class.getName()).log(Level.SEVERE, null, ex);
-//            }
-//                
-//            
-//        }
+            //read response from server
+            response = input.readLine();
+
+            if (extractCommand(response).equals(Constants.ERROR)){
+                response = null;
+                JOptionPane.showMessageDialog(null, "Login error!\nTry changing username");
+            }
         }
-            
-        
-    
+
+        readerThread = new ReaderThread(input, this);
+        new Thread(readerThread).start();
+
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -209,40 +191,30 @@ public class ClientGUI extends javax.swing.JFrame {
          this.dispose();
     }//GEN-LAST:event_logoutButtonActionPerformed
 
-    
-    
-    
+    public synchronized void writeOnChat(String message){
+        windows = windows + message + "\n";
+        chatArea.setText(windows);
+    }
+
     private void sendButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sendButtonActionPerformed
-        // TODO add your handling code here:
-        
+
         if(jTextField1.getText() != null && inputArea.getText() != null){
             command=createCommand("ONETOONE", jTextField1.getText(), inputArea.getText());
+            writeOnChat(username+" to "+jTextField1.getText() + " : " + inputArea.getText());
             output.println(command);
             output.flush();
-            windows= windows+
-                    username+"----->"+jTextField1.getText() + " Message: " + inputArea.getText()+"\n";
+
         }
        
     }//GEN-LAST:event_sendButtonActionPerformed
 
     private void broadcastButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_broadcastButtonActionPerformed
-        // TODO add your handling code here:
-        if(inputArea.getText() != null){
-            command= createCommand("BROADCAST",inputArea.getText());
-                                            output.println(command);
-                                            output.flush();
-            try {
-                response = read.readLine();
-            } catch (IOException ex) {
-                Logger.getLogger(ClientGUI.class.getName()).log(Level.SEVERE, null, ex);
-            }
-                
-                                             JOptionPane.showMessageDialog(null,"This is the response: " + response);
+        if(inputArea.getText() != null) {
+            command = createCommand("BROADCAST", inputArea.getText());
+            writeOnChat("<BROADCAST> "+"<"+username+">"+" <"+inputArea.getText()+">");
+            output.println(command);
+            output.flush();
         }
-        
-        if(extractCommand(response).equals(SUCCESS))
-            windows= windows+"<BROADCAST> "+"<"+username+">"+" <"+inputArea.getText()+">"+"\n";
-            chatArea.setText(windows);
     }//GEN-LAST:event_broadcastButtonActionPerformed
 
     /**
@@ -273,25 +245,15 @@ public class ClientGUI extends javax.swing.JFrame {
         //</editor-fold>
 
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                try{
-                new ClientGUI().setVisible(true);
-        
-                }catch (UnknownHostException e) {
-            // TODO Auto-generated catch block
-         
-            e.printStackTrace();
-        } catch (IOException e) {
+        java.awt.EventQueue.invokeLater(() -> {
+            try{
+            new ClientGUI().setVisible(true);
 
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-       
-            
-            } 
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         });
-                }
+    }
         
         
         
