@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 
 import static common.CommandParser.*;
 import static common.Constants.*;
+import static common.UserValidator.isUsernameValid;
 
 /**
  * The class that manage the connection with a single client
@@ -42,7 +43,7 @@ public class ChatServerThread implements Runnable{
 
             //If it receives a command that is not login or whose username is not suitable
             //sends an error and waits
-            while(!extractCommand(command).equals(LOGIN)|| username.equals("")){
+            while(!extractCommand(command).equals(LOGIN)|| !isUsernameValid(username)){
                 sendProtocol(ERROR);
                 command = readFromStream();
                 username = extractNthArgument(command, 1);
