@@ -72,6 +72,13 @@ public class ClientGUI extends javax.swing.JFrame {
             jLabel2.setText("<html><b style='font-size:large'> Welcome! You are logged in as "+username+"</b></html>");
         }
 
+        this.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                closeProtocol();
+            }
+        });
+
         new Thread(new ReaderThread(input, this)).start();
 
         
@@ -99,11 +106,6 @@ public class ClientGUI extends javax.swing.JFrame {
         jLabel2 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        addWindowListener(new java.awt.event.WindowAdapter() {
-            public void windowClosed(java.awt.event.WindowEvent evt) {
-                formWindowClosed(evt);
-            }
-        });
 
         inputArea.setColumns(20);
         inputArea.setRows(5);
@@ -193,16 +195,7 @@ public class ClientGUI extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void logoutButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_logoutButtonActionPerformed
-        // TODO add your handling code here:
-        
-         output.println(createCommand("LOGOUT"));
-         output.flush();
-        try {
-            socket.close();
-        } catch (IOException ex) {
-            Logger.getLogger(ClientGUI.class.getName()).log(Level.SEVERE, null, ex);
-        }
-         this.dispose();
+        closeProtocol();
     }//GEN-LAST:event_logoutButtonActionPerformed
 
     public synchronized void writeOnChat(String message){
@@ -232,7 +225,8 @@ public class ClientGUI extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_broadcastButtonActionPerformed
 
-    private void formWindowClosed(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosed
+    private void closeProtocol() {
+        System.out.println("QUI");
         // TODO add your handling code here:
          output.println(createCommand("LOGOUT"));
          output.flush();
@@ -242,7 +236,7 @@ public class ClientGUI extends javax.swing.JFrame {
             Logger.getLogger(ClientGUI.class.getName()).log(Level.SEVERE, null, ex);
         }
         this.dispose();
-    }//GEN-LAST:event_formWindowClosed
+    }
 
     /**
      * @param args the command line arguments
