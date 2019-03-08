@@ -68,7 +68,7 @@ public class ClientGUI extends javax.swing.JFrame {
                 JOptionPane.showMessageDialog(null, "Login error!\nTry changing username");
             }
         }
-        
+
         new Thread(new ReaderThread(input, this)).start();
 
     }
