@@ -27,9 +27,7 @@ public class ReaderThread implements Runnable {
                 if(response != null){
                     String command = extractCommand(response);
                     switch (command){
-                        case ERROR:
-                            gui.writeOnChat("Error!");
-                            break;
+                        
 
                         case SUCCESS:
                             try{
@@ -49,8 +47,13 @@ public class ReaderThread implements Runnable {
                         case BROADCAST:
                             sender = extractNthArgument(response, 1);
                             message = extractNthArgument(response,2);
-                            gui.writeOnChat(sender + "[BROADCAST]: " + message);
+                            gui.writeOnChat(sender + " [BROADCAST]: " + message);
                             break;
+                        
+                        default:
+                            gui.writeOnChat("Error!");
+                            break;
+                        
                     }
                 }
             } catch (IOException e) {

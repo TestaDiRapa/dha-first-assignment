@@ -74,7 +74,7 @@ public class ChatServer implements Runnable{
      */
     synchronized String sendBroadcast(String sender, String message){
         for(Map.Entry<String, ChatServerThread> entry : loggedUsers.entrySet()){
-            if(!entry.getKey().equals(sender)) entry.getValue().sendMessage(sender, message, ONETOONE);
+            if(!entry.getKey().equals(sender)) entry.getValue().sendMessage(sender, message, BROADCAST);
         }
         return Integer.toString(loggedUsers.size()-1);
     }
@@ -89,7 +89,7 @@ public class ChatServer implements Runnable{
     synchronized boolean sendMessage(String sender, String receiver, String message){
         ChatServerThread receiverThread = loggedUsers.get(receiver);
         if(receiverThread != null) {
-            receiverThread.sendMessage(sender, message, BROADCAST);
+            receiverThread.sendMessage(sender, message, ONETOONE);
             return true;
         }
         return false;
