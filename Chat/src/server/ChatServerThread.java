@@ -16,6 +16,8 @@ public class ChatServerThread implements Runnable{
     private Socket socket;
     private ChatServer server;
     private PrintWriter writer;
+    private BufferedReader reader;
+    private String username;
 
     /**
      * Constructor
@@ -32,18 +34,19 @@ public class ChatServerThread implements Runnable{
         try(PrintWriter writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_16));
             BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_16))) {
 
-            //Instantiate the write stream (try with resources, so closed automatically)
+            //Instantiate the streams (try with resources, so closed automatically)
+            this.reader = reader;
             this.writer = writer;
 
             //Reads the first command
-            String command = reader.readLine();
-            String username = extractNthArgument(command, 1);
+            String command = safeRead();
+            username = extractNthArgument(command, 1);
 
             //If it receives a command that is not login or whose username is not suitable
             //sends an error and waits
             while(!extractCommand(command).equals(LOGIN)|| !isUsernameValid(username) || !server.logIn(username, this)){
                 sendProtocol(ERROR);
-                command = reader.readLine();
+                command = safeRead();
                 username = extractNthArgument(command, 1);
             }
 
@@ -54,7 +57,7 @@ public class ChatServerThread implements Runnable{
             //Cycles until it receives a LOGOUT command
             while(!extractCommand(command).equals(LOGOUT)) {
                 //Reads the command
-                command = reader.readLine();
+                command = safeRead();
 
                 //If the command is ONETOONE, extracts receiver and message
                 //and asks the server to send the message
@@ -85,6 +88,8 @@ public class ChatServerThread implements Runnable{
 
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (UnexpectedDisconnectionException e) {
+            server.logOut(username);
         } finally {
             try {
                 socket.close();
@@ -95,16 +100,26 @@ public class ChatServerThread implements Runnable{
     }
 
     /**
+     * A safe read function to handle an unexpected disconnection from the user
+     * @return the incoming command, if not null
+     * @throws UnexpectedDisconnectionException if the client disconnects unexpectedly
+     * @throws IOException IOException
+     */
+    private String safeRead() throws UnexpectedDisconnectionException, IOException {
+        String ret = reader.readLine();
+        if(ret == null) throw new UnexpectedDisconnectionException();
+        return ret;
+    }
+
+    /**
      * A function that formats the command and send to the output stream
      * @param method the command
      * @param args the arguments
      */
-    private void sendProtocol(String method, String... args){
-        synchronized (writer) {
-            String toSend = createCommand(method, args);
-            writer.println(toSend);
-            writer.flush();
-        }
+    private synchronized void sendProtocol(String method, String... args){
+        String toSend = createCommand(method, args);
+        writer.println(toSend);
+        writer.flush();
     }
 
     /**
