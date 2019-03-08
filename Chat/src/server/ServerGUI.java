@@ -12,17 +12,17 @@ public class ServerGUI {
     private JLabel logLabel;
     private JTextArea logArea;
     private JPanel mainFrame;
+    private static JFrame frame;
 
-    private ServerGUI() {
-        new Thread(new ChatServer(this)).start();
-    }
+    private ServerGUI() { new Thread(new ChatServer(this)).start();  }
 
     public static void main(String[] args) {
-        JFrame frame = new JFrame("ServerGUI");
+        frame = new JFrame("ServerGUI");
         frame.setContentPane(new ServerGUI().mainFrame);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
+        frame.setResizable(false);
     }
 
     void updateUsers(Set<String> usernames) {
@@ -32,6 +32,9 @@ public class ServerGUI {
         }
     }
 
+    void forceClose() {
+        frame.dispose();
+    }
 
     void addEvent(String event) {
         logArea.append(event + "\n");
