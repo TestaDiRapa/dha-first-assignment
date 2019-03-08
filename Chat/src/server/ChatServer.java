@@ -1,6 +1,8 @@
 package server;
 
+import javax.swing.*;
 import java.io.IOException;
+import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
@@ -25,20 +27,24 @@ public class ChatServer implements Runnable{
      */
     @Override
     public void run(){
-        try {
-            ServerSocket serverSocket = new ServerSocket(PORT);
+        try(ServerSocket serverSocket = new ServerSocket(PORT)){
             gui.addEvent("Server started!");
 
             while(true) {
                 Socket client = serverSocket.accept();
-                gui.addEvent("New connection from "+client.getInetAddress().toString());
+                gui.addEvent("New connection from " + client.getInetAddress().toString());
                 Thread tmp = new Thread(new ChatServerThread(client, this));
                 tmp.start();
 
             }
 
+
+        } catch (BindException e) {
+            JOptionPane.showMessageDialog(null, "Port already in use!\nIs the server started already?", "Error!", JOptionPane.ERROR_MESSAGE);
+            gui.forceClose();
+
         } catch (IOException e) {
-            e.printStackTrace();
+            gui.forceClose();
         }
     }
 

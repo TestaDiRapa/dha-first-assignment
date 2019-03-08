@@ -65,7 +65,7 @@ public class ClientGUI extends javax.swing.JFrame {
 
             if (extractCommand(response).equals(Constants.ERROR)){
                 response = null;
-                JOptionPane.showMessageDialog(null, "Login error!\nTry changing username");
+                JOptionPane.showMessageDialog(null, "Login error!\nTry changing username", "Error!", JOptionPane.ERROR_MESSAGE);
             }
         }
 
