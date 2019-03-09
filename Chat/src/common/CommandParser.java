@@ -43,14 +43,10 @@ public class CommandParser {
      * @return the argument, if any, or empty string
      */
     public static String extractNthArgument(String command, int argument){
-        String regex = "^<[A-Z]+>";
-        for(int i=0; i<argument; i++){
-            regex += " <([^<>]*)>";
-        }
-        Pattern p = Pattern.compile(regex);
-        Matcher m = p.matcher(command);
-        if(m.find()) return m.group(argument);
-        return "";
+        command = command.substring(0, command.length()-1);
+        String[] args = command.split("> <");
+        if(argument+1 > args.length) return "";
+        return args[argument];
     }
 
 }

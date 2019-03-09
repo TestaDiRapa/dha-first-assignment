@@ -68,7 +68,7 @@ public class ChatServerThread implements Runnable{
                     //If the server managed to send the message, sends a SUCCESS
                     //to the client, otherwise ERROR
                     if(server.sendMessage(username, receiver, message)) {
-                        sendProtocol(SUCCESS);
+                        sendProtocol(SUCCESS, "-1");
                     }
                     else {
                         sendProtocol(ERROR);
