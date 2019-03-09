@@ -82,7 +82,8 @@ public class ChatServer implements Runnable{
      */
     synchronized void logOut(String username){
         loggedUsers.remove(username);
-        gui.addEvent(username + " logged out!");
+        if(username != null) gui.addEvent(username + " logged out!");
+        else gui.addEvent("Client connection aborted!");
         gui.updateUsers(loggedUsers.keySet());
     }
 

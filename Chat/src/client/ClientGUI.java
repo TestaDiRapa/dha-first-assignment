@@ -55,6 +55,10 @@ public class ClientGUI extends javax.swing.JFrame {
             while(response ==null){
                 //prompt for user name
                 username=JOptionPane.showInputDialog(null, "Enter User Name:");
+
+                //If the user clicks "cancel" the program exits
+                if(username == null) System.exit(0);
+
                 command= createCommand("LOGIN",username);
 
                 //send user name to server
