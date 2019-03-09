@@ -9,6 +9,8 @@ import common.Constants;
 import static common.CommandParser.createCommand;
 import static common.CommandParser.extractCommand;
 import static common.Constants.PORT;
+import common.UserValidator;
+import static common.UserValidator.isUsernameValid;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -205,24 +207,32 @@ public class ClientGUI extends javax.swing.JFrame {
 
     private void sendButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sendButtonActionPerformed
 
-        if(jTextField1.getText() != null && inputArea.getText() != null){
+        if(!jTextField1.getText().isEmpty() && !inputArea.getText().isEmpty()){
+            if(isUsernameValid(jTextField1.getText())){
             command=createCommand("ONETOONE", jTextField1.getText(), inputArea.getText());
             writeOnChat(username+" to "+jTextField1.getText() + " : " + inputArea.getText());
             output.println(command);
             output.flush();
             inputArea.setText("");
+            }
+            else 
+                JOptionPane.showMessageDialog(this, "Sender not valid ");
         }
+        else
+            JOptionPane.showMessageDialog(this,"Message or sender empty");
        
     }//GEN-LAST:event_sendButtonActionPerformed
 
     private void broadcastButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_broadcastButtonActionPerformed
-        if(inputArea.getText() != null) {
+        if(!inputArea.getText().isEmpty()) {
             command = createCommand("BROADCAST", inputArea.getText());
             writeOnChat("BROADCAST "+"by "+username+": "+inputArea.getText());
             output.println(command);
             output.flush();
             inputArea.setText("");
         }
+        else
+            JOptionPane.showMessageDialog(this,"Message empty");
     }//GEN-LAST:event_broadcastButtonActionPerformed
 
     private void closeProtocol() {
