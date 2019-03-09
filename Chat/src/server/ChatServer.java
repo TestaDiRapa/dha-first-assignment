@@ -17,6 +17,7 @@ public class ChatServer implements Runnable{
 
     private Map<String, ChatServerThread> loggedUsers = new HashMap<>();
     private ServerGUI gui;
+    private ServerSocket serverSocket;
 
     ChatServer(ServerGUI gui) {
         this.gui = gui;
@@ -27,7 +28,8 @@ public class ChatServer implements Runnable{
      */
     @Override
     public void run(){
-        try(ServerSocket serverSocket = new ServerSocket(PORT)){
+        try{
+            serverSocket = new ServerSocket(PORT);
             gui.addEvent("Server started!");
 
             while(true) {
@@ -45,6 +47,17 @@ public class ChatServer implements Runnable{
 
         } catch (IOException e) {
             gui.forceClose();
+        }
+    }
+
+    /**
+     * Forces closing the server socket
+     */
+    void forceClose() {
+        try {
+            serverSocket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

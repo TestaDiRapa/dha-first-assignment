@@ -9,7 +9,6 @@ import common.Constants;
 import static common.CommandParser.createCommand;
 import static common.CommandParser.extractCommand;
 import static common.Constants.PORT;
-import common.UserValidator;
 import static common.UserValidator.isUsernameValid;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -34,6 +33,7 @@ public class ClientGUI extends javax.swing.JFrame {
     private String username;
     private String command;
     private String windows = "";
+    private ReaderThread readerThread;
            
     
     /**
@@ -43,45 +43,49 @@ public class ClientGUI extends javax.swing.JFrame {
         initComponents();
         this.setLocationRelativeTo(null);
         this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-        
+
+
         try{
             socket = new Socket("localhost",PORT);
+            //Initializes I/O streams
+            output = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_16));
+            BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_16));
+
+            String response = null;
+            while(response ==null){
+                //prompt for user name
+                username=JOptionPane.showInputDialog(null, "Enter User Name:");
+                command= createCommand("LOGIN",username);
+
+                //send user name to server
+                output.println(command);
+                output.flush();
+
+                //read response from server
+                response = input.readLine();
+
+                if (extractCommand(response).equals(Constants.ERROR)){
+                    response = null;
+                    JOptionPane.showMessageDialog(null, "Login error!\nTry changing username", "Error!", JOptionPane.ERROR_MESSAGE);
+                }
+                jLabel2.setText("<html><b style='font-size:large'> Welcome! You are logged in as "+username+"</b></html>");
+            }
+
+            this.addWindowListener(new java.awt.event.WindowAdapter() {
+                @Override
+                public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                    closeProtocol();
+                }
+            });
+
+            readerThread = new ReaderThread(input, this);
+            new Thread(readerThread).start();
+
        } catch(ConnectException e){
           JOptionPane.showMessageDialog(null, "Server not ready");
            exit(0);
        }
-        //Initializes I/O streams
-        output = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_16));
-        BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_16));
 
-        String response = null;
-        while(response ==null){
-            //prompt for user name
-            username=JOptionPane.showInputDialog(null, "Enter User Name:");
-            command= createCommand("LOGIN",username);
-
-            //send user name to server
-            output.println(command);
-            output.flush();
-
-            //read response from server
-            response = input.readLine();
-
-            if (extractCommand(response).equals(Constants.ERROR)){
-                response = null;
-                JOptionPane.showMessageDialog(null, "Login error!\nTry changing username", "Error!", JOptionPane.ERROR_MESSAGE);
-            }
-            jLabel2.setText("<html><b style='font-size:large'> Welcome! You are logged in as "+username+"</b></html>");
-        }
-
-        this.addWindowListener(new java.awt.event.WindowAdapter() {
-            @Override
-            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
-                closeProtocol();
-            }
-        });
-
-        new Thread(new ReaderThread(input, this)).start();
 
         
         
@@ -200,20 +204,28 @@ public class ClientGUI extends javax.swing.JFrame {
         closeProtocol();
     }//GEN-LAST:event_logoutButtonActionPerformed
 
-    public synchronized void writeOnChat(String message){
+    /**
+     * Add a message to the chat area (\n automatically added)
+     * @param message the message to add
+     */
+    synchronized void writeOnChat(String message){
         windows = windows + message + "\n";
         chatArea.setText(windows);
     }
 
+    /**
+     * Sends a private message to a user, if the user or the message are empty, prompts an error
+     * @param evt the event
+     */
     private void sendButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sendButtonActionPerformed
 
         if(!jTextField1.getText().isEmpty() && !inputArea.getText().isEmpty()){
             if(isUsernameValid(jTextField1.getText())){
-            command=createCommand("ONETOONE", jTextField1.getText(), inputArea.getText());
-            writeOnChat(username+" to "+jTextField1.getText() + " : " + inputArea.getText());
-            output.println(command);
-            output.flush();
-            inputArea.setText("");
+                command=createCommand("ONETOONE", jTextField1.getText(), inputArea.getText());
+                writeOnChat(username+" to "+jTextField1.getText() + " : " + inputArea.getText());
+                output.println(command);
+                output.flush();
+                inputArea.setText("");
             }
             else 
                 JOptionPane.showMessageDialog(this, "Sender not valid ");
@@ -223,6 +235,10 @@ public class ClientGUI extends javax.swing.JFrame {
        
     }//GEN-LAST:event_sendButtonActionPerformed
 
+    /**
+     * Send a broadcast message, if the message is empty prompts an error
+     * @param evt the event
+     */
     private void broadcastButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_broadcastButtonActionPerformed
         if(!inputArea.getText().isEmpty()) {
             command = createCommand("BROADCAST", inputArea.getText());
@@ -235,11 +251,13 @@ public class ClientGUI extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this,"Message empty");
     }//GEN-LAST:event_broadcastButtonActionPerformed
 
-    private void closeProtocol() {
-        System.out.println("QUI");
-        // TODO add your handling code here:
+    /**
+     * Function to call when the window must close in order to close the communication correctly
+     */
+    void closeProtocol() {
          output.println(createCommand("LOGOUT"));
          output.flush();
+         readerThread.forceStop();
         try {
             socket.close();
         } catch (IOException ex) {

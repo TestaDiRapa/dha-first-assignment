@@ -4,7 +4,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.Set;
 
-
+/**
+ * The GUI class for the server
+ */
 public class ServerGUI {
 
     private JLabel userLabel;
@@ -12,10 +14,22 @@ public class ServerGUI {
     private JLabel logLabel;
     private JTextArea logArea;
     private JPanel mainFrame;
+
+    private static ChatServer serverThread;
     private static JFrame frame;
 
-    private ServerGUI() { new Thread(new ChatServer(this)).start();  }
+    /**
+     * Constructor, it starts the server
+     */
+    private ServerGUI() {
+        serverThread = new ChatServer(this);
+        new Thread(serverThread).start();
+    }
 
+    /**
+     * GUI main
+     * @param args args
+     */
     public static void main(String[] args) {
         frame = new JFrame("ServerGUI");
         frame.setContentPane(new ServerGUI().mainFrame);
@@ -23,8 +37,18 @@ public class ServerGUI {
         frame.pack();
         frame.setVisible(true);
         frame.setResizable(false);
+        frame.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                serverThread.forceClose();
+            }
+        });
     }
 
+    /**
+     *  Update the list of connected users
+     * @param usernames a set containing the usernames of the connected users
+     */
     void updateUsers(Set<String> usernames) {
         userList.setText("");
         for (String user : usernames) {
@@ -32,10 +56,17 @@ public class ServerGUI {
         }
     }
 
+    /**
+     * Closes the frame
+     */
     void forceClose() {
         frame.dispose();
     }
 
+    /**
+     * Adds a new event (incoming connection, login, logout) to the log area
+     * @param event the description of the event
+     */
     void addEvent(String event) {
         logArea.append(event + "\n");
     }
