@@ -44,9 +44,14 @@ public class ReaderThread implements Runnable {
                             //otherwise is the success response to a ONETOONE
                             try{
                                 String receivers = extractNthArgument(response, 1);
-                                gui.writeOnChat("Message sent to: " + receivers + " users!");
+                                int numUtenti = Integer.parseInt(receivers);                                
+                                if(numUtenti >= 0){
+                                    gui.writeOnChat("Message sent to: " + receivers + " users!");
+                                } else {
+                                    gui.writeOnChat("Message sent!");
+                                }
                             } catch (Exception e) {
-                                gui.writeOnChat("Message sent!");
+                                
                             }
                             break;
 
