@@ -47,7 +47,7 @@ public class ReaderThread implements Runnable {
                                 int numUtenti = Integer.parseInt(receivers);                                
                                 if(numUtenti >= 0){
                                     gui.writeOnChat("Message sent to: " + receivers + " users!");
-                                } else {
+                                } else if(numUtenti == -1){
                                     gui.writeOnChat("Message sent!");
                                 }
                             } catch (Exception e) {
