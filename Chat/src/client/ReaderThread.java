@@ -32,7 +32,6 @@ public class ReaderThread implements Runnable {
         while (!stop) {
             try {
                 response = input.readLine();
-
                 //If the response is not null parse the response and act accordingly
                 if(response != null){
                     String command = extractCommand(response);
@@ -75,25 +74,34 @@ public class ReaderThread implements Runnable {
                 }
                 // If the response is null means that the server disconnected, so closes the client after three seconds
                 else {
-                    for(int i = 3; i>0; i--){
-                        gui.writeOnChat("WARNING! Cannot communicate with the server, closing in "+i+"...");
-                        Thread.sleep(1000);
-                    }
-                    stop = true;
-                    gui.closeProtocol();
+                    handleCommunicationError();
                 }
-            } catch (IOException e) {
-                stop = true;
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            } catch (IOException e){
+                handleCommunicationError();
             }
         }
     }
 
     /**
+     * A function that shows an error message three times with an interval of one second and then stops the thread
+     */
+    private void handleCommunicationError() {
+        for (int i = 3; i > 0; i--) {
+            gui.writeOnChat("WARNING! Cannot communicate with the server, closing in " + i + "...");
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e1) {
+                e1.printStackTrace();
+            }
+        }
+        stop = true;
+        gui.closeProtocol();
+    }
+
+    /**
      * Stops the thread
      */
-    public void forceStop(){
+    void forceStop(){
         stop = true;
     }
 
